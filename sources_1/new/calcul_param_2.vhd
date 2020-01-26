@@ -25,7 +25,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;  -- pour les additions dans les compteurs
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;  -- pour les additions dans les compteurs
 USE ieee.numeric_std.ALL;
 Library UNISIM;
 use UNISIM.vcomponents.all;
@@ -51,13 +51,36 @@ architecture Behavioral of calcul_param_2 is
 ---------------------------------------------------------------------------------
 -- Signaux
 ----------------------------------------------------------------------------------
-    
 
+signal curr_sqr_sum : unsigned(48 downto 0) := (others => '0');
+signal sqr_fact_val : unsigned(48 downto 0);
+
+signal ech_int : integer;
+signal sqr_val_int : integer;
+signal sqr_val_float : natural;
+signal sqr_fact_val_float : natural;
+signal curr_sum_float : natural;
 ---------------------------------------------------------------------------------------------
 --    Description comportementale
 ---------------------------------------------------------------------------------------------
 begin 
-
-     o_param <= x"02";    -- temporaire ...
+    
+    process(i_reset, i_bclk)
+    begin
+        if i_reset = '1' then
+            o_param <= (others => '0');
+        end if;
+        if i_bclk = '1' and i_bclk'event then
+            --curr_sqr_sum <= i_ech + curr_sqr_sum;
+            ech_int <= to_integer(signed(i_ech));
+            sqr_val_int <= ech_int * ech_int;
+            sqr_val_float <= natural(sqr_val_int);
+            sqr_fact_val_float <= (sqr_val_float * 31)/32;
+            curr_sum_float <= curr_sum_float + sqr_fact_val_float;
+            
+            
+        end if;
+    end process;
+     --o_param <= x"02";    -- temporaire ...
 
 end Behavioral;
