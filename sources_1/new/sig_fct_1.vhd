@@ -49,19 +49,34 @@ architecture Behavioral of sig_fct_1 is
 ----------------------------------------------------------------------------------
     
     CONSTANT Vs : std_logic_vector(21 downto 0) := "1111111111111111111111";
+    CONSTANT VSComp : integer := abs(to_integer(unsigned(Vs)));
+    SIGNAL output : std_logic_vector(23 downto 0);
+    SIGNAL absolute : integer := abs(to_integer(unsigned(i_ech)));
     
 ---------------------------------------------------------------------------------------------
 --    Description comportementale
 ---------------------------------------------------------------------------------------------
 begin 
 
+    absolute <= abs(to_integer(unsigned(i_ech)));
+
     process(i_ech)
     begin
-        IF abs(to_integer(signed(i_ech))) < Vs then
-            o_ech_fct <= i_ech;
+        IF absolute < VsComp then
+            output <= i_ech;
+        elsif i_ech(23) = '0' then
+            output <= "001111111111111111111111";
+        elsif absolute = 0 then
+            output <= "000000000000000000000000";
         else
-            o_ech_fct <= i_ech(23) & '0' & Vs;
+            output <= "110000000000000000000001";
         end if;
     end process;
+    
+    o_ech_fct <= output;
+
+--    o_ech_fct <= i_ech when abs(to_integer(signed(i_ech))) < Vs
+--              else i_ech(23) & '0' & Vs when i_ech(23) = '0'
+--              else i_ech(23) & "10000000000000000000001";
     
 end Behavioral;
