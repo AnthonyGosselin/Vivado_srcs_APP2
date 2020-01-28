@@ -3,7 +3,7 @@
 --    calcul_param_2.vhd   (temporaire)
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
---    Université de Sherbrooke - Département de GEGI
+--    Universitï¿½ de Sherbrooke - Dï¿½partement de GEGI
 --
 --    Version         : 5.0
 --    Nomenclature    : inspiree de la nomenclature 0.2 GRAMS
@@ -17,15 +17,15 @@
 ---------------------------------------------------------------------------------------------
 --
 ---------------------------------------------------------------------------------------------
--- À FAIRE: 
--- Voir le guide de la problématique
+-- ï¿½ FAIRE: 
+-- Voir le guide de la problï¿½matique
 ---------------------------------------------------------------------------------------------
 --
 ---------------------------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.STD_LOGIC_UNSIGNED.ALL;  -- pour les additions dans les compteurs
+use IEEE.STD_LOGIC_UNSIGNED.ALL;  -- pour les additions dans les compteurs
 USE ieee.numeric_std.ALL;
 Library UNISIM;
 use UNISIM.vcomponents.all;
@@ -48,39 +48,52 @@ end calcul_param_2;
 
 architecture Behavioral of calcul_param_2 is
 
+component reg_nbits is
+generic (nbits : integer := 48);
+  Port ( 
+    i_clk       : in std_logic;
+    i_reset     : in std_logic;
+    i_en        : in std_logic;
+    i_dat       : in std_logic_vector(nbits-1 downto 0);
+    o_dat       : out  std_logic_vector(nbits-1 downto 0)
+);
+end component;
+
 ---------------------------------------------------------------------------------
 -- Signaux
 ----------------------------------------------------------------------------------
+    
+signal sum : std_logic_vector (47 downto 0);
+signal output : signed (47 downto 0);
+signal product : signed (95 downto 0);
+signal squared : signed (47 downto 0);
 
-signal curr_sqr_sum : unsigned(48 downto 0) := (others => '0');
-signal sqr_fact_val : unsigned(48 downto 0);
-
-signal ech_int : integer;
-signal sqr_val_int : integer;
-signal sqr_val_float : natural;
-signal sqr_fact_val_float : natural;
-signal curr_sum_float : natural;
 ---------------------------------------------------------------------------------------------
 --    Description comportementale
 ---------------------------------------------------------------------------------------------
 begin 
-    
-    process(i_reset, i_bclk)
-    begin
-        if i_reset = '1' then
-            o_param <= (others => '0');
-        end if;
-        if i_bclk = '1' and i_bclk'event then
-            --curr_sqr_sum <= i_ech + curr_sqr_sum;
-            ech_int <= to_integer(signed(i_ech));
-            sqr_val_int <= ech_int * ech_int;
-            sqr_val_float <= natural(sqr_val_int);
-            sqr_fact_val_float <= (sqr_val_float * 31)/32;
-            curr_sum_float <= curr_sum_float + sqr_fact_val_float;
-            
-            
-        end if;
-    end process;
-     --o_param <= x"02";    -- temporaire ...
+
+sum_reg : reg_nbits
+generic map (nbits => 48)
+  Port map ( 
+    i_clk       => i_bclk,
+    i_reset     => i_reset,
+    i_en        => i_en,
+    i_dat       => std_logic_vector(output),
+    o_dat       => sum
+);
+
+--process(i_en, i_reset)
+--begin
+--    if i_reset = '1' then
+--        output <= (others => '0');
+--    end if;
+--end process;
+
+squared <= signed(i_ech) * signed(i_ech);
+output <= squared + product(95 downto 48);
+product <= (signed(sum) * 31/32);
+
+o_param <= std_logic_vector(output(47 downto 40));
 
 end Behavioral;

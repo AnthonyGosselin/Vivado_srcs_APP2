@@ -106,7 +106,7 @@ begin
              fsm_prochainEtat <= sta_gf;
          else
              fsm_prochainEtat <= sta_d0;
-         end if;
+            end if;
          when sta_g0 =>
              fsm_prochainEtat <= sta_g1;
          when sta_g1 =>
@@ -141,7 +141,7 @@ begin
      end case;
   end process;
  
-   sortie: process(fsm_EtatCourant, i_lrc )
+  sortie: process(fsm_EtatCourant, i_lrc )
   begin
  
    case fsm_EtatCourant is
