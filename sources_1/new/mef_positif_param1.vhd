@@ -32,12 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity mef_positif_param1 is
-    Port ( i_ech            : in STD_LOGIC_VECTOR(23 downto 0);
+    Port ( i_sign            : in STD_LOGIC;
            i_bclk           : in std_logic;
            i_reset          : in std_logic;  
            i_en             : out std_logic;
            o_cpt_bit_reset  : out std_logic;
-           Affirmed         : out std_logic
+           o_reg_en         : out std_logic
     );
 end mef_positif_param1;
 
@@ -55,7 +55,8 @@ architecture Behavioral of mef_positif_param1 is
          sta_posf
          );
 
-    signal fsm_EtatCourant, fsm_prochainEtat : fsm_positif_etats;
+    signal fsm_EtatCourant: fsm_positif_etats := sta_init;
+    signal fsm_prochainEtat : fsm_positif_etats;
 
 begin
 
@@ -71,41 +72,41 @@ begin
    end process;
    
    -- conditions de transitions
-transitions: process(fsm_EtatCourant)
+transitions: process(fsm_EtatCourant, i_sign)
   begin
    case fsm_EtatCourant is
         when sta_init =>
-            if (i_ech(23) = '0') then
-                fsm_prochainEtat <= sta_pos1;
-            else
+            if (i_sign = '1') then
                 fsm_prochainEtat <= sta_neg1;
+            else
+                fsm_prochainEtat <= sta_pos1;
             end if;
         when sta_neg1 =>                     -------------------------------------------------------------------------------------
-             if(i_ech(23) = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
+             if(i_sign = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
                  fsm_prochainEtat <= sta_posf;  -------------------------------------------------------------------------------------
              else
                  fsm_prochainEtat <= sta_neg2;
              end if;
          when sta_neg2 =>                     -------------------------------------------------------------------------------------
-             if(i_ech(23) = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
+             if(i_sign = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
                  fsm_prochainEtat <= sta_posf;  -------------------------------------------------------------------------------------
              else
                  fsm_prochainEtat <= sta_negf;
              end if;
           when sta_negf =>                     -------------------------------------------------------------------------------------
-             if(i_ech(23) = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
+             if(i_sign = '0') then            -- A verifier si les clocks sont synchro aka pas vérifier 3 fois la meme value
                  fsm_prochainEtat <= sta_pos1;  -------------------------------------------------------------------------------------
              else
                  fsm_prochainEtat <= sta_negf;
              end if;
          when sta_pos1 =>
-            if (i_ech(23) = '0') then
+            if (i_sign = '0') then
                 fsm_prochainEtat <= sta_pos2;
             else
                 fsm_prochainEtat <= sta_negf;
             end if;
          when sta_pos2 =>
-            if( i_ech(23) = '0' ) then
+            if( i_sign = '0' ) then
                 fsm_prochainEtat <= sta_pos3;
             else
                 fsm_prochainEtat <= sta_negf;
@@ -113,7 +114,7 @@ transitions: process(fsm_EtatCourant)
          when sta_pos3 =>
             fsm_prochainEtat <= sta_posf;
         when sta_posf =>
-            if ( i_ech(23) = '0' ) then
+            if ( i_sign = '0' ) then
                 fsm_prochainEtat <= sta_posf;
             else
                 fsm_prochainEtat <= sta_neg1;
@@ -128,37 +129,29 @@ sortie: process(fsm_EtatCourant)
  
    case fsm_EtatCourant is
         when sta_init =>
-            o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_cpt_bit_reset    <= '1';
+            o_reg_en           <= '0';
         when sta_neg1=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '0';
         when sta_neg2=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '0';
         when sta_negf=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '0';
         when sta_pos1=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '0';
         when sta_pos2=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '1';
         when sta_pos3=>
             o_cpt_bit_reset    <= '1';
-            i_en               <= '1';
-            Affirmed           <= '1';
+            o_reg_en           <= '0';
         when sta_posf=>
             o_cpt_bit_reset    <= '0';
-            i_en               <= '1';
-            Affirmed           <= '0';
+            o_reg_en           <= '0';
      end case;
     end process;
 
