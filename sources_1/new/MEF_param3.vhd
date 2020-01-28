@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -66,7 +66,7 @@ begin
         end if;
     end process;
 
-transitions_output: process(i_start, fsm_currentState)
+transitions_output: process(i_bclk, i_start, fsm_currentState)
     begin
         case fsm_currentState is
             when sta_init =>
@@ -84,18 +84,20 @@ transitions_output: process(i_start, fsm_currentState)
                     fsm_nextState <= sta_init;
                 end if;
             when sta_compare =>
-                if (i_cnt < "0110000"  and i_dat > i_cmp_dat) then
-                    o_rst_cnt    <= '0';
-                    o_enable_cnt <= '1';
-                    o_write_cmp_reg <= '1';
-                    o_write_o_reg <= '0';
-                    fsm_nextState <= sta_write;
-                elsif (i_cnt < "0110000"  and i_dat <= i_cmp_dat) then
-                    o_rst_cnt    <= '0';
-                    o_enable_cnt <= '1';
-                    o_write_cmp_reg <= '0';
-                    o_write_o_reg <= '0';
-                    fsm_nextState <= sta_compare;
+                if (i_cnt < "0110000") then
+                    if (signed(i_dat) > signed(i_cmp_dat)) then
+                        o_rst_cnt    <= '0';
+                        o_enable_cnt <= '1';
+                        o_write_cmp_reg <= '1';
+                        o_write_o_reg <= '0';
+                        fsm_nextState <= sta_write;
+                    else
+                        o_rst_cnt    <= '0';
+                        o_enable_cnt <= '1';
+                        o_write_cmp_reg <= '0';
+                        o_write_o_reg <= '0';
+                        fsm_nextState <= sta_compare;
+                    end if;
                 else
                     o_rst_cnt    <= '1';
                     o_enable_cnt <= '0';

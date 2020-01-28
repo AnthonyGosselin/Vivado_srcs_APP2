@@ -35,7 +35,6 @@ entity mef_positif_param1 is
     Port ( i_sign            : in STD_LOGIC;
            i_bclk           : in std_logic;
            i_reset          : in std_logic;  
-           i_en             : out std_logic;
            o_cpt_bit_reset  : out std_logic;
            o_reg_en         : out std_logic
     );

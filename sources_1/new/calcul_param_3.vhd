@@ -124,7 +124,7 @@ begin
 inst_mef : MEF_param3
     Port map ( i_bclk => i_bclk,
        i_rst => i_reset,
-       i_dat => o_fifo,
+       i_dat => o_fifo,                 -- convert to signed data
        i_cmp_dat => cmp_reg,
        i_cnt => cnt,
        i_start => i_en,        -- to change to enable when fifo write
@@ -148,7 +148,7 @@ inst_fifo : fifo
            o_full    => open,
            
            -- FIFO Read Interface
-           i_rd_en   => enable_cnt,
+           i_rd_en   => enable_cnt, -- add to strobe
            o_rd_data => o_fifo,
            o_empty   => open
            );

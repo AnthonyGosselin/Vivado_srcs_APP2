@@ -56,14 +56,13 @@ Component mef_positif_param1 is
     Port ( i_sign            : in STD_LOGIC;
            i_bclk           : in std_logic;
            i_reset          : in    std_logic;  
-           i_en             : out   std_logic;
            o_cpt_bit_reset  : out std_logic;
            o_reg_en         : out std_logic
     );
 end Component;
 
 Component compteur_nbits is
-generic (nbits : integer := 12);
+generic (nbits : integer := 8);
    port ( clk             : in    std_logic; 
           i_en            : in    std_logic; 
           reset           : in    std_logic; 
@@ -71,25 +70,24 @@ generic (nbits : integer := 12);
           );
 end Component;
 
-Component reg_nbits
-generic (nbits : integer := 12); 
-  Port ( 
-    i_clk       : in std_logic;
-    i_reset     : in std_logic;
-    i_en        : in std_logic;
-    i_dat       : in std_logic_vector(nbits-1 downto 0);
-    o_dat       : out  std_logic_vector(nbits-1 downto 0)
-);
-end Component;
+--Component reg_nbits
+--generic (nbits : integer := 12); 
+--  Port ( 
+--    i_clk       : in std_logic;
+--    i_reset     : in std_logic;
+--    i_en        : in std_logic;
+--    i_dat       : in std_logic_vector(nbits-1 downto 0);
+--    o_dat       : out  std_logic_vector(nbits-1 downto 0)
+--);
+--end Component;
 
 --SIGNAL s_Affirmed : STD_LOGIC ;
-SIGNAL s_val_cpt : STD_LOGIC_VECTOR(11 downto 0) ;
+SIGNAL s_val_cpt : STD_LOGIC_VECTOR(7 downto 0) ;
 SIGNAL s_reset : STD_LOGIC ;
-SIGNAL s_en : STD_LOGIC ;
 
 --CONSTANT f_bclk : integer := 3100000;       -- 3.1 MHz
 SIGNAL s_reg_en : std_logic;
-SIGNAL o_reg_dat : std_logic_vector(11 downto 0);
+--SIGNAL o_reg_dat : std_logic_vector(11 downto 0);
 
 
 ---------------------------------------------------------------------------------------------
@@ -100,30 +98,36 @@ begin
 inst_mef_positif_param1: mef_positif_param1
     port map (  i_sign           =>     i_ech(23),
                 i_bclk           =>     i_bclk,
-                i_reset          =>     i_reset,                       
-                i_en             =>     s_en,                       
+                i_reset          =>     i_reset,                                            
                 o_cpt_bit_reset  =>     s_reset,
                 o_reg_en         =>     s_reg_en
     );
     
 inst_cpt_positif_param1: compteur_nbits
-    port map (  clk        =>     i_bclk,
+    port map (  clk        =>     i_en,
                 i_en       =>     '1',
                 reset      =>     s_reset,                       
                 o_val_cpt  =>     s_val_cpt
     );    
     
-inst_reg : reg_nbits
-  generic map (nbits => 12) 
-    Port map ( 
-      i_clk       => i_bclk,
-      i_reset     => i_reset,
-      i_en        => s_reg_en,
-      i_dat       => s_val_cpt,
-      o_dat       => o_reg_dat
-  );
+--inst_reg : reg_nbits
+--  generic map (nbits => 12) 
+--    Port map ( 
+--      i_clk       => i_bclk,
+--      i_reset     => i_reset,
+--      i_en        => s_reg_en,
+--      i_dat       => s_val_cpt,
+--      o_dat       => o_reg_dat
+--  );
 
-    o_param <= o_reg_dat (7 downto 0);
+    param1_shoot_counter: process(s_reg_en)
+    begin
+        if rising_edge(s_reg_en) then
+            o_param <= "00000000";
+            o_param <= s_val_cpt after 1 ps;
+        end if;
+    end process;
+    
     
     --s_reset <= i_reset;
 
